@@ -1,0 +1,44 @@
+version: '2'
+
+services:
+  compass-db:
+    container_name: compass-db
+    ports:
+    - 3306:3306/tcp
+    tty: true
+    image: compassindocker/compass-db
+    stdin_open: true
+
+  compass-mq:
+    container_name: compass-mq
+    ports:
+    - 5672:5672/tcp
+    tty: true
+    image: rabbitmq
+    stdin_open: true
+
+  compass-tasks:
+    container_name: compass-tasks
+    image: compassindocker/compass-tasks
+    volumes:
+    - switch_list:/etc/compass/switch_list
+    - machine_list:/etc/compass/machine_list
+    links:
+    - compass-mq
+    depends_on:
+    - compass-mq
+    stdin_open: true
+
+  compass-deck:
+    container_name: compass-deck
+    ports:
+    - 5050:80/tcp
+    tty: true
+    image: compassindocker/compass-deck
+    links:
+    - compass-db
+    - compass-mq
+    depends_on:
+    - compass-db
+    - compass-mq
+    stdin_open: true
