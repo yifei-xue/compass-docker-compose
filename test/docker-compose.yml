@@ -21,10 +21,11 @@ services:
     container_name: compass-tasks
     image: compassindocker/compass-tasks
     volumes:
-    - switch_list:/etc/compass/switch_list
-    - machine_list:/etc/compass/machine_list
+    - /home/core/stack360/compass-docker-compose/test/switch_list:/etc/compass/switch_list
+    - /home/core/stack360/compass-docker-compose/test/machine_list:/etc/compass/machine_list
     links:
     - compass-mq
+    - compass-cobbler
     depends_on:
     - compass-mq
     stdin_open: true
