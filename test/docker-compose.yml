@@ -23,11 +23,13 @@ services:
     volumes:
     - /home/core/stack360/compass-docker-compose/test/switch_list:/etc/compass/switch_list
     - /home/core/stack360/compass-docker-compose/test/machine_list:/etc/compass/machine_list
+    - /home/core/stack360/compass-docker-compose/ansible:/var/ansible
     links:
     - compass-mq
     - compass-cobbler
     depends_on:
     - compass-mq
+    - compass-cobbler
     stdin_open: true
 
   compass-deck:
@@ -43,3 +45,22 @@ services:
     - compass-db
     - compass-mq
     stdin_open: true
+
+  compass-cobbler:
+    container_name: compass-cobbler
+    hostname: compass-cobbler
+    privileged: true
+    image: compassindocker/compass-cobbler
+    ports:
+    - 80:80/tcp
+    - 69:69/tcp
+    - 443:443/tcp
+    - 25151:25151/tcp
+    - 67:67/tcp
+    volumes:
+    - /home/core/stack360/compass-docker-compose/cobbler/conf:/root/conf
+    - /home/core/stack360/compass-docker-compose/cobbler/kickstarts:/root/kickstarts
+    - /home/core/stack360/compass-docker-compose/cobbler/scripts:/root/scripts
+    - /home/core/stack360/compass-docker-compose/cobbler/snippets:/root/snippets
+    - /home/core/stack360/compass-docker-compose/cobbler/triggers:/root/triggers
+    - /home/core/stack360/dists:/mnt:ro
