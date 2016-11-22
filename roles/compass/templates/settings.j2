@@ -77,7 +77,7 @@ default_kickstart: /var/lib/cobbler/kickstarts/default.ks
 # configure all installed systems to use these nameservers by default
 # unless defined differently in the profile.  For DHCP configurations
 # you probably do /not/ want to supply this.
-default_name_servers: ['10.0.2.15']
+default_name_servers: ['10.1.10.15']
 
 # if using the authz_ownership module (see the Wiki), objects
 # created without specifying an owner are assigned to this
@@ -259,13 +259,13 @@ manage_rsync: 0
 # if using BIND (named) for DNS management in /etc/cobbler/modules.conf
 # and manage_dns is enabled (above), this lists which zones are managed
 # See the Wiki (https://github.com/cobbler/cobbler/wiki/Dns-management) for more info
-manage_forward_zones: []
+manage_forward_zones: ['ods.com']
 manage_reverse_zones: []
 
 # if using cobbler with manage_dhcp, put the IP address
 # of the cobbler server here so that PXE booting guests can find it
 # if you do not set this correctly, this will be manifested in TFTP open timeouts.
-next_server: 172.16.250.10
+next_server: {{ install_ip }}
 
 # settings for power management features.  optional.
 # see https://github.com/cobbler/cobbler/wiki/Power-management to learn more
@@ -380,7 +380,7 @@ scm_track_mode: "git"
 # if you have a server that appears differently to different subnets
 # (dual homed, etc), you need to read the --server-override section
 # of the manpage for how that works.
-server: 172.16.250.10
+server: {{ install_ip }}
 
 # If set to 1, all commands will be forced to use the localhost address
 # instead of using the above value which can force commands like

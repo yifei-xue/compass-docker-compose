@@ -1,0 +1,6 @@
+---
+- name: pipework an IP address for compass-cobbler
+  command: "/usr/local/bin/pipework {{ install_net }} compass-cobbler {{ install_ip }}"
+
+- name: run cobbler start.sh
+  command: docker exec -it compass-cobbler /usr/local/bin/start.sh

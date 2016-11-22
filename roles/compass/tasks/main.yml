@@ -1,0 +1,124 @@
+---
+- name: copy pipework script 
+  copy:
+    src: pipework
+    dest: /usr/local/bin/pipework
+    owner: root
+    group: root
+    mode: 0755
+
+- name: create running directory
+  file:
+    path: "/root/docker_compose"
+    state: directory
+    mode: 0644
+
+- name: create dists
+  file:
+    path: "/root/docker_compose/{{ item }}"
+    state: directory
+    mode: 0644
+  with_items:
+    - dists
+    - dists/ppas
+    - tmp
+
+- name: git clone adapters
+  git:
+    repo: "{{ adapter_repo }}"
+    dest: "/root/compass4nfv"
+
+- name: move adapters to docker-compose directory
+  command: "cp -rf /root/compass4nfv/deploy/adapters/{{ item }} /root/docker_compose/"
+  with_items:
+    - ansible
+    - cobbler
+
+- name: create sub directories
+  file:
+    path: "/root/docker_compose/{{ item }}"
+    state: directory
+    mode: 0644
+  with_items:
+    - switch_list
+    - machine_list
+    - dists/centos7-mitaka-ppa
+    - dists/trusty-mitaka-ppa
+
+- name: replace switch list
+  copy:
+    src: switch_list.conf
+    dest: "/root/docker_compose/switch_list/switch_list.conf"
+    owner: root
+    group: root
+    mode: 0777
+
+- name: render machine_list
+  template:
+    src: machine_list.conf.j2
+    dest: "/root/docker_compose/machine_list/machine_list.conf"
+    owner: root
+    group: root
+    mode: 0777
+    
+#- name: render cobbler setting file
+#  template:
+#    src: settings.j2
+#    dest: "{{ ansible_env.HOME }}"/docker_compose/cobbler/conf/settings"
+#    user: root
+#    group: root
+#    mode: 0644
+
+- name: render templates
+  template:
+    src: "{{ item }}.j2"
+    dest: "/root/docker_compose/cobbler/conf/{{ item }}"
+    owner: root
+    group: root
+    mode: 0644
+  with_items:
+    - dhcp.template
+    - named.template
+    - zone.template
+    - settings
+
+- name: render docker-compose file
+  template:
+    src: docker-compose.yml.j2
+    dest: "/root/docker_compose/docker-compose.yml"
+    owner: root
+    group: root 
+    mode: 0644
+
+- name: get isos
+  get_url:
+    url: "{{ item }}"
+    dest: "/root/docker_compose/dists/"
+  with_items:
+    - "{{ ubuntu_iso_url }}"
+    - "{{ centos_iso_url }}"
+
+- name: get ppas 
+  get_url:
+    url: "{{ item }}"
+    dest: "/root/docker_compose/tmp/"
+  with_items:
+    - "{{ ubuntu_ppa_url }}"
+    - "{{ centos_ppa_url }}"
+
+- name: untar ppas
+  command: "tar -xzvf /root/docker_compose/tmp/{{ item }}.tar.gz -C /root/docker_compose/dists/{{ item }}"
+  with_items:
+    - centos7-mitaka-ppa
+    - trusty-mitaka-ppa
+
+- name: mount iso to dists
+  mount:
+    name: "/mnt/{{ item }}"
+    src: "/root/docker_compose/dists/{{ item }}"
+    fstype: iso9660
+    opts: loop
+    state: present
+  with_items:
+    - "{{ ubuntu_iso_name }}"
+    - "{{ centos_iso_name }}"

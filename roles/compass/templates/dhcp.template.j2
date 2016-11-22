@@ -13,7 +13,7 @@ ddns-update-style interim;
 allow booting;
 allow bootp;
 deny unknown-clients;
-local-address 172.16.250.10;
+local-address {{ install_ip }};
 log-facility local6;
 
 ignore client-updates;
@@ -26,14 +26,14 @@ option pxelinux.configfile code 209 = text;
 option pxelinux.pathprefix code 210 = text;
 option pxelinux.reboottime code 211 = unsigned integer 32;
 
-subnet 172.16.250.0 netmask 255.255.255.0 {
-     option routers 172.16.250.10;
-     option domain-name-servers 172.16.250.10;
-     option subnet-mask 255.255.255.0;
-     range dynamic-bootp 172.16.250.150 172.16.250.200;
+subnet {{ install_subnet }} netmask {{ install_netmask }} {
+     option routers {{ install_ip }};
+     option domain-name-servers {{ install_ip }};
+     option subnet-mask {{ install_netmask }};
+     range dynamic-bootp {{ install_ip_range }};
      default-lease-time 21600;
      max-lease-time 43200;
-     next-server 172.16.250.10;
+     next-server {{ install_ip }};
      class "pxeclients" {
           match if substring (option vendor-class-identifier, 0, 9) = "PXEClient";
           if option pxe-system-type = 00:02 {
@@ -95,4 +95,3 @@ group {
         #end for
 }
 #end for
-

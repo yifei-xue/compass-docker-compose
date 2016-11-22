@@ -21,9 +21,9 @@ services:
     container_name: compass-tasks
     image: compassindocker/compass-tasks
     volumes:
-    - /home/xicheng/work/stack360/compass-docker-compose/test/switch_list:/etc/compass/switch_list
-    - /home/xicheng/work/stack360/compass-docker-compose/test/machine_list:/etc/compass/machine_list
-    - /home/xicheng/work/stack360/compass-docker-compose/ansible:/var/ansible
+    - {{ ansible_env.HOME }}/docker_compose/switch_list:/etc/compass/switch_list
+    - {{ ansible_env.HOME }}/docker_compose/machine_list:/etc/compass/machine_list
+    - {{ ansible_env.HOME }}/docker-compose/ansible:/var/ansible
     links:
     - compass-mq
     - compass-cobbler
@@ -58,10 +58,10 @@ services:
     - 25151:25151/tcp
     - 67:67/tcp
     volumes:
-    - /home/xicheng/work/stack360/compass-docker-compose/cobbler/conf:/root/conf
-    - /home/xicheng/work/stack360/compass-docker-compose/cobbler/kickstarts:/root/kickstarts
-    - /home/xicheng/work/stack360/compass-docker-compose/cobbler/scripts:/root/scripts
-    - /home/xicheng/work/stack360/compass-docker-compose/cobbler/snippets:/root/snippets
-    - /home/xicheng/work/stack360/compass-docker-compose/cobbler/triggers:/root/triggers
-    - /home/xicheng/work/stack360/dists:/mnt:ro
-    - /home/xicheng/work/stack360/ppas:/root/ppas
+    - {{ ansible_env.HOME }}/docker-compose/cobbler/conf:/root/conf
+    - {{ ansible_env.HOME }}/docker-compose/cobbler/kickstarts:/root/kickstarts
+    - {{ ansible_env.HOME }}/docker-compose/cobbler/scripts:/root/scripts
+    - {{ ansible_env.HOME }}/docker-compose/cobbler/snippets:/root/snippets
+    - {{ ansible_env.HOME }}/docker-compose/cobbler/triggers:/root/triggers
+    - {{ ansible_env.HOME }}/docker-compose/dists:/mnt:ro
+    - {{ ansible_env.HOME }}/dists/ppas:/root/ppas

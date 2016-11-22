@@ -1,0 +1,7 @@
+---
+- name: Install Compass
+  hosts: all
+  sudo: yes
+  roles:
+#    - docker
+    - compass

@@ -1,10 +1,10 @@
 options {
-          listen-on port 53 { 172.16.250.10; };
+          listen-on port 53 { {{ install_ip }}; };
           directory       "/var/named";
           dump-file       "/var/named/data/cache_dump.db";
           statistics-file "/var/named/data/named_stats.txt";
           memstatistics-file "/var/named/data/named_mem_stats.txt";
-          allow-query { 127.0.0.0/8; 172.16.250.0/24; };
+          allow-query { 127.0.0.0/8; {{ install_subnet }}/{{ install_prefix }}; };
           recursion yes;
 };
 
