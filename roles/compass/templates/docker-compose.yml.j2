@@ -23,7 +23,8 @@ services:
     volumes:
     - {{ ansible_env.HOME }}/docker_compose/switch_list:/etc/compass/switch_list
     - {{ ansible_env.HOME }}/docker_compose/machine_list:/etc/compass/machine_list
-    - {{ ansible_env.HOME }}/docker-compose/ansible:/var/ansible
+    - {{ ansible_env.HOME }}/docker_compose/ansible:/var/ansible
+    - {{ ansible_env.HOME }}/docker_compose/os_installer:/etc/compass/os_installer
     links:
     - compass-mq
     - compass-cobbler
@@ -53,15 +54,15 @@ services:
     image: compassindocker/compass-cobbler
     ports:
     - 80:80/tcp
-    - 69:69/tcp
+    - 69:69
     - 443:443/tcp
     - 25151:25151/tcp
     - 67:67/tcp
     volumes:
-    - {{ ansible_env.HOME }}/docker-compose/cobbler/conf:/root/conf
-    - {{ ansible_env.HOME }}/docker-compose/cobbler/kickstarts:/root/kickstarts
-    - {{ ansible_env.HOME }}/docker-compose/cobbler/scripts:/root/scripts
-    - {{ ansible_env.HOME }}/docker-compose/cobbler/snippets:/root/snippets
-    - {{ ansible_env.HOME }}/docker-compose/cobbler/triggers:/root/triggers
-    - {{ ansible_env.HOME }}/docker-compose/dists:/mnt:ro
-    - {{ ansible_env.HOME }}/dists/ppas:/root/ppas
+    - {{ ansible_env.HOME }}/docker_compose/cobbler/conf:/root/conf
+    - {{ ansible_env.HOME }}/docker_compose/cobbler/kickstarts:/root/kickstarts
+    - {{ ansible_env.HOME }}/docker_compose/cobbler/scripts:/root/scripts
+    - {{ ansible_env.HOME }}/docker_compose/cobbler/snippets:/root/snippets
+    - {{ ansible_env.HOME }}/docker_compose/cobbler/triggers:/root/triggers
+    - /mnt:/mnt:ro
+    - {{ ansible_env.HOME }}/docker_compose/dists/ppas:/root/ppas

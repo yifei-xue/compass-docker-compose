@@ -42,8 +42,10 @@
   with_items:
     - switch_list
     - machine_list
+    - os_installer
     - dists/centos7-mitaka-ppa
     - dists/trusty-mitaka-ppa
+    - ansible/run
 
 - name: replace switch list
   copy:
@@ -60,15 +62,15 @@
     owner: root
     group: root
     mode: 0777
-    
-#- name: render cobbler setting file
-#  template:
-#    src: settings.j2
-#    dest: "{{ ansible_env.HOME }}"/docker_compose/cobbler/conf/settings"
-#    user: root
-#    group: root
-#    mode: 0644
 
+- name: render cobbler.conf
+  template:
+    src: cobbler.conf.j2
+    dest: "/root/docker_compose/os_installer/cobbler.conf"
+    owner: root
+    group: root
+    mode: 0777
+    
 - name: render templates
   template:
     src: "{{ item }}.j2"
@@ -107,7 +109,7 @@
     - "{{ centos_ppa_url }}"
 
 - name: untar ppas
-  command: "tar -xzvf /root/docker_compose/tmp/{{ item }}.tar.gz -C /root/docker_compose/dists/{{ item }}"
+  command: "tar -xzvf /root/docker_compose/tmp/{{ item }}.tar.gz -C /root/docker_compose/dists/ppas"
   with_items:
     - centos7-mitaka-ppa
     - trusty-mitaka-ppa
@@ -115,10 +117,10 @@
 - name: mount iso to dists
   mount:
     name: "/mnt/{{ item }}"
-    src: "/root/docker_compose/dists/{{ item }}"
+    src: "/root/docker_compose/dists/{{ item }}.iso"
     fstype: iso9660
-    opts: loop
-    state: present
+    opts: ro,loop
+    state: mounted
   with_items:
     - "{{ ubuntu_iso_name }}"
     - "{{ centos_iso_name }}"

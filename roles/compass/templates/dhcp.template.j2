@@ -27,13 +27,13 @@ option pxelinux.pathprefix code 210 = text;
 option pxelinux.reboottime code 211 = unsigned integer 32;
 
 subnet {{ install_subnet }} netmask {{ install_netmask }} {
-     option routers {{ install_ip }};
-     option domain-name-servers {{ install_ip }};
+     option routers {{ host_ip }};
+     option domain-name-servers {{ host_ip }};
      option subnet-mask {{ install_netmask }};
      range dynamic-bootp {{ install_ip_range }};
      default-lease-time 21600;
      max-lease-time 43200;
-     next-server {{ install_ip }};
+     next-server {{ host_ip }};
      class "pxeclients" {
           match if substring (option vendor-class-identifier, 0, 9) = "PXEClient";
           if option pxe-system-type = 00:02 {

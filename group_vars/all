@@ -3,7 +3,8 @@ install_net: eth1
 install_subnet: 10.1.0.0
 install_prefix: 24
 install_netmask: 255.255.255.0
-install_ip: 10.1.0.11
+install_ip: 10.1.0.110
+host_ip: 10.1.0.11
 install_ip_range: 10.1.0.100 10.1.0.250
 mac_addresses: ['08:00:27:97:31:99']
 
