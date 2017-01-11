@@ -50,6 +50,7 @@ services:
   compass-cobbler:
     container_name: compass-cobbler
     hostname: compass-cobbler
+    network_mode: host
     privileged: true
     image: compassindocker/compass-cobbler
     ports:
@@ -66,3 +67,4 @@ services:
     - {{ ansible_env.HOME }}/docker_compose/cobbler/triggers:/root/triggers
     - /mnt:/mnt:ro
     - {{ ansible_env.HOME }}/docker_compose/dists/ppas:/root/ppas
+    - {{ ansible_env.HOME }}/docker_compose/dists/pip:/var/www/pip

@@ -1,5 +1,5 @@
 options {
-          listen-on port 53 { {{ install_ip }}; };
+          listen-on port 53 { {{ host_ip }}; };
           directory       "/var/named";
           dump-file       "/var/named/data/cache_dump.db";
           statistics-file "/var/named/data/named_stats.txt";

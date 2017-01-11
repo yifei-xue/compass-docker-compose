@@ -13,7 +13,7 @@ ddns-update-style interim;
 allow booting;
 allow bootp;
 deny unknown-clients;
-local-address {{ install_ip }};
+local-address {{ host_ip }};
 log-facility local6;
 
 ignore client-updates;

@@ -27,12 +27,21 @@
   git:
     repo: "{{ adapter_repo }}"
     dest: "/root/compass4nfv"
+    version: "{{ release_tag }}"
 
 - name: move adapters to docker-compose directory
   command: "cp -rf /root/compass4nfv/deploy/adapters/{{ item }} /root/docker_compose/"
   with_items:
     - ansible
     - cobbler
+
+- name: replace preseed_post_anamon
+  copy:
+    src: preseed_post_anamon
+    dest: "/root/docker_compose/cobbler/snippets/preseed_post_anamon"
+    owner: root
+    group: root
+    mode: 0644 
 
 - name: create sub directories
   file:
@@ -92,13 +101,13 @@
     group: root 
     mode: 0644
 
-- name: get isos
-  get_url:
-    url: "{{ item }}"
-    dest: "/root/docker_compose/dists/"
-  with_items:
-    - "{{ ubuntu_iso_url }}"
-    - "{{ centos_iso_url }}"
+#- name: get isos
+#  get_url:
+#    url: "{{ item }}"
+#    dest: "/root/docker_compose/dists/"
+#  with_items:
+#    - "{{ ubuntu_iso_url }}"
+#    - "{{ centos_iso_url }}"
 
 - name: get ppas 
   get_url:
@@ -106,13 +115,31 @@
     dest: "/root/docker_compose/tmp/"
   with_items:
     - "{{ ubuntu_ppa_url }}"
-    - "{{ centos_ppa_url }}"
+#    - "{{ centos_ppa_url }}"
+
+- name: download pip packages
+  get_url:
+    url: "{{ pip_url }}"
+    dest: "/root/docker_compose/tmp/"
+    mode: 0644
+
+- name: clean ppas
+  command: "rm -rf /root/docker_compose/dists/ppas/*"
 
 - name: untar ppas
-  command: "tar -xzvf /root/docker_compose/tmp/{{ item }}.tar.gz -C /root/docker_compose/dists/ppas"
-  with_items:
-    - centos7-mitaka-ppa
-    - trusty-mitaka-ppa
+  command: "tar -xzvf /root/docker_compose/tmp/{{ item }} -C /root/docker_compose/dists/ppas"
+  with_items: ppas_tarlist
+
+- name: untar pip tarball
+  command: "tar -xzvf /root/docker_compose/tmp/{{ pip_name }}.tar.gz -C /root/docker_compose/dists/"
+
+- name: remove pip directory
+  file:
+    path: /root/docker_compose/dists/pip
+    state: absent
+
+- name: move pip packages
+  command: "mv /root/docker_compose/dists/{{ pip_name }} /root/docker_compose/dists/pip"
 
 - name: mount iso to dists
   mount:
