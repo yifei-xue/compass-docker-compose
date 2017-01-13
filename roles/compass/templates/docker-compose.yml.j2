@@ -68,3 +68,4 @@ services:
     - /mnt:/mnt:ro
     - {{ ansible_env.HOME }}/docker_compose/dists/ppas:/root/ppas
     - {{ ansible_env.HOME }}/docker_compose/dists/pip:/var/www/pip
+    - {{ ansible_env.HOME }}/docker_compose/dists/packages:/var/www/packages

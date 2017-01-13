@@ -21,19 +21,27 @@
   with_items:
     - dists
     - dists/ppas
+    - dists/packages
     - tmp
 
 - name: git clone adapters
   git:
     repo: "{{ adapter_repo }}"
     dest: "/root/compass4nfv"
-    version: "{{ release_tag }}"
 
-- name: move adapters to docker-compose directory
-  command: "cp -rf /root/compass4nfv/deploy/adapters/{{ item }} /root/docker_compose/"
-  with_items:
-    - ansible
-    - cobbler
+- name: move cobbler files to docker-compose directory
+  command: "cp -rf /root/compass4nfv/deploy/adapters/cobbler /root/docker_compose/"
+
+- name: script to prepare ansible files
+  copy:
+    src: prepare_ansible.sh
+    dest: /root/docker_compose/prepare_ansible.sh
+    owner: root
+    group: root
+    mode: 0755
+
+- name: run script to prepare ansible files
+  command: "/root/docker_compose/prepare_ansible.sh"
 
 - name: replace preseed_post_anamon
   copy:
@@ -101,13 +109,13 @@
     group: root 
     mode: 0644
 
-#- name: get isos
-#  get_url:
-#    url: "{{ item }}"
-#    dest: "/root/docker_compose/dists/"
-#  with_items:
-#    - "{{ ubuntu_iso_url }}"
-#    - "{{ centos_iso_url }}"
+- name: get isos
+  get_url:
+    url: "{{ item }}"
+    dest: "/root/docker_compose/dists/"
+  with_items:
+    - "{{ ubuntu_iso_url }}"
+    - "{{ centos_iso_url }}"
 
 - name: get ppas 
   get_url:
@@ -115,11 +123,17 @@
     dest: "/root/docker_compose/tmp/"
   with_items:
     - "{{ ubuntu_ppa_url }}"
-#    - "{{ centos_ppa_url }}"
+    - "{{ centos_ppa_url }}"
 
 - name: download pip packages
   get_url:
     url: "{{ pip_url }}"
+    dest: "/root/docker_compose/tmp/"
+    mode: 0644
+
+- name: download extra packages
+  get_url:
+    url: "{{ extra_packages_url }}"
     dest: "/root/docker_compose/tmp/"
     mode: 0644
 
@@ -130,16 +144,25 @@
   command: "tar -xzvf /root/docker_compose/tmp/{{ item }} -C /root/docker_compose/dists/ppas"
   with_items: ppas_tarlist
 
-- name: untar pip tarball
-  command: "tar -xzvf /root/docker_compose/tmp/{{ pip_name }}.tar.gz -C /root/docker_compose/dists/"
-
 - name: remove pip directory
   file:
     path: /root/docker_compose/dists/pip
     state: absent
 
+- name: untar pip tarball
+  command: "tar -xzvf /root/docker_compose/tmp/{{ pip_name }}.tar.gz -C /root/docker_compose/dists/"
+
 - name: move pip packages
   command: "mv /root/docker_compose/dists/{{ pip_name }} /root/docker_compose/dists/pip"
+  when: not pip_name == 'pip'
+
+- name: remove packages directory
+  file:
+    path: /root/docker_compose/dists/packages
+    state: absent
+
+- name: untar extra packages
+  command: "tar -xzvf /root/docker_compose/tmp/packages.tar.gz -C /root/docker_compose/dists/"
 
 - name: mount iso to dists
   mount:
