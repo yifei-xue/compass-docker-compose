@@ -2,5 +2,89 @@
 #- name: pipework an IP address for compass-cobbler
 #  command: "pipework {{ install_net }} compass-cobbler {{ install_ip }}/{{ install_prefix }}"
 
-- name: run cobbler start.sh
-  command: docker exec -it compass-cobbler /usr/local/bin/start.sh
+#- name: run cobbler start.sh
+#  command: docker exec -it compass-cobbler /usr/local/bin/start.sh
+
+- name: copy files
+  shell: |
+    docker exec compass-cobbler bash -c \
+    "cp -rf /root/conf/* /etc/cobbler/
+     mkdir -p /var/lib/cobbler/kickstarts-backup
+     mv /var/lib/cobbler/kickstarts/* /var/lib/cobbler/kickstarts-backup
+     cp -rf /root/kickstarts/* /var/lib/cobbler/kickstarts
+     mkdir -p /var/lib/cobbler/snippets-backup
+     mv /var/lib/cobbler/snippets/* /var/lib/cobbler/snippets-backup
+     cp -rf /root/snippets/* /var/lib/cobbler/snippets/
+     mkdir -p /var/lib/cobbler/triggers-backup
+     mv /var/lib/cobbler/triggers/* /var/lib/cobbler/triggers-backup
+     cp -rf /root/triggers/* /var/lib/cobbler/triggers
+     mkdir -p /var/lib/cobbler/scripts-backup
+     mv /var/lib/cobbler/scripts/* /var/lib/cobbler/scripts-backup
+     cp -rf /root/scripts/* /var/lib/cobbler/scripts
+     mkdir -p /var/lib/cobbler/repo_mirror
+     cp -rf /root/ppas/* /var/lib/cobbler/repo_mirror
+     cp -rf /root/extra/distro_signatures.json /var/lib/cobbler/distro_signatures.json
+     service httpd restart
+     service cobblerd restart"
+
+- name: chmod migrate_ks.py
+  shell: |
+    docker exec compass-cobbler bash -c \
+    "chmod +x /var/lib/cobbler/triggers/sync/post/migrate_ks.py"
+
+- name: cobbler import iso
+  shell: |
+    name=`basename {{ item.value.iso_name }} | sed -e 's/.iso//g' -e 's/-amd64//g' -e 's/-x86_64//g'`
+    docker exec compass-cobbler bash -c \
+    "cobbler import --name $name \
+                    --path /mnt/{{ item.value.iso_name }} \
+                    --arch x86_64 \
+                    --kickstart /var/lib/cobbler/kickstarts/{{ item.value.kickstart }} \
+                    --breed {{ item.value.breed }}"
+  with_dict: "{{ distros }}"
+  run_once: True
+
+- name: get default repo
+  shell: |
+    docker exec compass-cobbler bash -c \
+    "cobbler repo list"
+  register: default_repos
+
+- name: remove default repo
+  shell: |
+    docker exec compass-cobbler bash -c \
+    "cobbler repo remove --name {{ item }}"
+  with_items: "{{ default_repos.stdout_lines }}"
+
+- name: add repos
+  shell: |
+    docker exec compass-cobbler bash -c \
+    "cobbler repo add --name {{ item.value.ppa_name }} \
+                      --mirror=/var/lib/cobbler/repo_mirror/{{ item.value.ppa_name }} \
+                      --mirror-locally=True \
+                      --arch=x86_64 {{ item.value.extra | default()}}"
+  with_dict: "{{ distros }}"
+  run_once: True
+
+- name: edit profiles
+  shell: |
+    name=`basename {{ item.value.iso_name }} | sed -e 's/.iso//g' -e 's/-amd64//g' -e 's/-x86_64//g'`-x86_64
+    docker exec compass-cobbler bash -c \
+    "cobbler profile edit --name $name \
+                          --name-servers '' \
+                          --repos {{ item.value.ppa_name }} \
+                          --ksmeta \"tree=http://{{ host_ip }}/cobbler/ks_mirror/$name\" \
+                          --kopts \"{{ item.value.kopts | default('') }}\" \
+                          --kopts-post \"{{ item.value.kopts_post | default('') }}\""
+  with_dict: "{{ distros }}"
+  run_once: True
+
+- name: cobbler reposync
+  shell: |
+    docker exec compass-cobbler bash -c \
+    "cobbler reposync"
+
+- name: cobbler sync
+  shell: |
+    docker exec compass-cobbler bash -c \
+    "cobbler sync"

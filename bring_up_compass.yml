@@ -1,7 +1,10 @@
 ---
 - name: Install Compass
   hosts: all
-  sudo: yes
+  sudo: True
   roles:
-    - docker
+#    - docker
     - compass
+    - cobbler
+#    - discovery
+    - machines

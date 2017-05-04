@@ -1,32 +1,36 @@
 ---
 # env vars
-install_net: eth1 
+compass_adapter_dir: /compassdir/work3/compass4nfv/deploy/adapters
+docker_compose_dir: /compassdir/work3/compass4nfv/work/docker_compose
+
+docker_tag: v0.1
+deck_port: 5050
+
+host_ip: 10.1.0.1
+install_net: eth1
 install_subnet: 10.1.0.0
 install_prefix: 24
 install_netmask: 255.255.255.0
-host_ip: 10.1.0.11
 install_ip_range: 10.1.0.100 10.1.0.250
-mac_addresses: ['00:0c:29:1e:c7:35']
 
 
 # Compass default vars
-adapter_repo: https://github.com/stack360/compass4nfv
-
-ubuntu_iso_url: http://205.177.226.237:9999/ubuntu-14.04.3-server-amd64.iso
-centos_iso_url: http://205.177.226.237:9999/CentOS-7-x86_64-Minimal-1511.iso
-ubuntu_ppa_url: http://205.177.226.237:9999/trusty-mitaka-ppa.tar.gz_nfs-server
-centos_ppa_url: http://205.177.226.237:9999/centos7-mitaka-ppa.tar.gz
-ppas_tarlist:
-    - trusty-mitaka-ppa.tar.gz_nfs-server
-    - centos7-mitaka-ppa.tar.gz
+# adapter_repo: https://github.com/stack360/compass4nfv
+#
+# ubuntu_iso_url: http://192.168.104.2:9999/download/ubuntu-16.04-server-amd64.iso
+# centos_iso_url: http://192.168.104.2:9999/download/CentOS-7-x86_64-Minimal-1611.iso
+# ubuntu_ppa_url: http://192.168.104.2:9999/download/xenial-newton-ppa.tar.gz
+# centos_ppa_url: http://192.168.104.2:9999/download/centos7-newton-ppa.tar.gz
+# ppas_tarlist:
+#     - trusty-mitaka-ppa.tar.gz_nfs-server
+#     - centos7-mitaka-ppa.tar.gz
 # centos_ppa_url: http://192.168.253.161:8000/centos7-mitaka-ppa.tar.gz
-pip_url: http://205.177.226.237:9999/colorado/pip.tar.gz
-pip_name: pip
-extra_packages_url: http://205.177.226.237:9999/colorado/packages.tar.gz
+pip_url: http://192.168.104.2:9999/download/pip-openstack.tar.gz
+pip_name: pip-openstack
+extra_packages_url: http://192.168.104.2:9999/download/packages.tar.gz
 
-ubuntu_iso_name: ubuntu-14.04.3-server-amd64
-centos_iso_name: CentOS-7-x86_64-Minimal-1511
-release_tag: colorado.3.0
+#ubuntu_iso_name: ubuntu-16.04-server-amd64.iso
+#centos_iso_name: CentOS-7-x86_64-Minimal-1611.iso
 
 # Docker vars
 apt_key_sig: 58118E89F3A912897C070ADBF76221572C52609D
@@ -49,4 +53,28 @@ pip_version_pip: latest
 pip_version_setuptools: latest
 pip_version_docker_py: latest
 pip_version_docker_compose: latest
+
+distros:
+  ubuntu-16.04:
+    breed: "ubuntu"
+    kickstart: "default16.seed"
+    kopts: "netcfg/choose_interface=auto console='ttyS0,115200n8' console=tty0 net.ifnames=0 biosdevname=0 vga=788"
+    kopts_post: "console='ttyS0,115200n8' console=tty0 net.ifnames=0 biosdevname=0 vga=788"
+    extra: "--apt-dists=xenial --apt-components=main"
+    aliase: "xenial"
+    version: "ubuntu"
+    iso_name: ubuntu-16.04-server-amd64
+    ppa_name: xenial-newton-ppa
+    iso_url: http://192.168.104.2:9999/download/ubuntu-16.04-server-amd64.iso
+    ppa_url: http://192.168.104.2:9999/download/xenial-newton-ppa.tar.gz
+
+  CentOS-7:
+    breed: "redhat"
+    kickstart: "default.ks"
+    aliase: "centos7"
+    version: "centos"
+    iso_name: CentOS-7-x86_64-Minimal-1611
+    ppa_name: centos7-newton-ppa
+    iso_url: http://192.168.104.2:9999/download/CentOS-7-x86_64-Minimal-1611.iso
+    ppa_url: http://192.168.104.2:9999/download/centos7-newton-ppa.tar.gz
 

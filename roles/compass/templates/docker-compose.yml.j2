@@ -3,28 +3,35 @@ version: '2'
 services:
   compass-db:
     container_name: compass-db
+    hostname: compass-db
+    privileged: true
     ports:
-    - 3306:3306/tcp
+    - {{ host_ip }}:3306:3306/tcp
     tty: true
-    image: compassindocker/compass-db
+    image: huangxiangyu/compass-db:{{ docker_tag }}
     stdin_open: true
 
   compass-mq:
     container_name: compass-mq
+    hostname: compass-mq
+    privileged: true
     ports:
-    - 5672:5672/tcp
+    - {{ host_ip }}:5672:5672/tcp
     tty: true
     image: rabbitmq
     stdin_open: true
 
   compass-tasks:
     container_name: compass-tasks
-    image: compassindocker/compass-tasks
+    hostname: compass-tasks
+    privileged: true
+    image: huangxiangyu/compass-tasks:{{ docker_tag }}
     volumes:
-    - {{ ansible_env.HOME }}/docker_compose/switch_list:/etc/compass/switch_list
-    - {{ ansible_env.HOME }}/docker_compose/machine_list:/etc/compass/machine_list
-    - {{ ansible_env.HOME }}/docker_compose/ansible:/var/ansible
-    - {{ ansible_env.HOME }}/docker_compose/os_installer:/etc/compass/os_installer
+    - {{ docker_compose_dir }}/switch_list:/etc/compass/switch_list
+    - {{ docker_compose_dir }}/machine_list:/etc/compass/machine_list
+    - {{ docker_compose_dir }}/ansible:/var/ansible
+    - {{ docker_compose_dir }}/ansible_callbacks:/opt/ansible_callbacks
+    - {{ docker_compose_dir }}/os_installer:/etc/compass/os_installer
     links:
     - compass-mq
     - compass-cobbler
@@ -35,10 +42,15 @@ services:
 
   compass-deck:
     container_name: compass-deck
+    hostname: compass-deck
+    privileged: true
+    image: huangxiangyu/compass-deck:{{ docker_tag }}
     ports:
-    - 5050:80/tcp
+    - {{ host_ip }}:{{ deck_port }}:80/tcp
+    - {{ jh_ip.stdout }}:{{ deck_port }}:80/tcp
     tty: true
-    image: compassindocker/compass-deck
+    volumes:
+    - {{ docker_compose_dir }}/ansible_callbacks:/root/compass-deck/bin/ansible_callbacks
     links:
     - compass-db
     - compass-mq
@@ -52,20 +64,21 @@ services:
     hostname: compass-cobbler
     network_mode: host
     privileged: true
-    image: compassindocker/compass-cobbler
+    image: huangxiangyu/compass-cobbler:{{ docker_tag }}
     ports:
-    - 80:80/tcp
-    - 69:69
-    - 443:443/tcp
-    - 25151:25151/tcp
-    - 67:67/tcp
+    - {{ host_ip }}:80:80/tcp
+    - {{ host_ip }}:69:69
+    - {{ host_ip }}:443:443/tcp
+    - {{ host_ip }}:25151:25151/tcp
+    - {{ host_ip }}:67:67/tcp
     volumes:
-    - {{ ansible_env.HOME }}/docker_compose/cobbler/conf:/root/conf
-    - {{ ansible_env.HOME }}/docker_compose/cobbler/kickstarts:/root/kickstarts
-    - {{ ansible_env.HOME }}/docker_compose/cobbler/scripts:/root/scripts
-    - {{ ansible_env.HOME }}/docker_compose/cobbler/snippets:/root/snippets
-    - {{ ansible_env.HOME }}/docker_compose/cobbler/triggers:/root/triggers
-    - /mnt:/mnt:ro
-    - {{ ansible_env.HOME }}/docker_compose/dists/ppas:/root/ppas
-    - {{ ansible_env.HOME }}/docker_compose/dists/pip:/var/www/pip
-    - {{ ansible_env.HOME }}/docker_compose/dists/packages:/var/www/packages
+    - {{ docker_compose_dir }}/cobbler/conf:/root/conf
+    - {{ docker_compose_dir }}/cobbler/kickstarts:/root/kickstarts
+    - {{ docker_compose_dir }}/cobbler/scripts:/root/scripts
+    - {{ docker_compose_dir }}/cobbler/snippets:/root/snippets
+    - {{ docker_compose_dir }}/cobbler/triggers:/root/triggers
+    - {{ docker_compose_dir }}/mnt:/mnt:ro
+    - {{ docker_compose_dir }}/dists/ppas:/root/ppas
+    - {{ docker_compose_dir }}/dists/pip-openstack:/var/www/pip-openstack
+    - {{ docker_compose_dir }}/dists/packages:/var/www/packages
+    - {{ docker_compose_dir }}/extra:/root/extra
