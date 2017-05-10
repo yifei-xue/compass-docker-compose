@@ -4,45 +4,84 @@
 
 #- name: run cobbler start.sh
 #  command: docker exec -it compass-cobbler /usr/local/bin/start.sh
-
 - name: copy files
   shell: |
     docker exec compass-cobbler bash -c \
-    "cp -rf /root/conf/* /etc/cobbler/
-     mkdir -p /var/lib/cobbler/kickstarts-backup
-     mv /var/lib/cobbler/kickstarts/* /var/lib/cobbler/kickstarts-backup
-     cp -rf /root/kickstarts/* /var/lib/cobbler/kickstarts
-     mkdir -p /var/lib/cobbler/snippets-backup
-     mv /var/lib/cobbler/snippets/* /var/lib/cobbler/snippets-backup
-     cp -rf /root/snippets/* /var/lib/cobbler/snippets/
-     mkdir -p /var/lib/cobbler/triggers-backup
-     mv /var/lib/cobbler/triggers/* /var/lib/cobbler/triggers-backup
-     cp -rf /root/triggers/* /var/lib/cobbler/triggers
-     mkdir -p /var/lib/cobbler/scripts-backup
-     mv /var/lib/cobbler/scripts/* /var/lib/cobbler/scripts-backup
-     cp -rf /root/scripts/* /var/lib/cobbler/scripts
-     mkdir -p /var/lib/cobbler/repo_mirror
-     cp -rf /root/ppas/* /var/lib/cobbler/repo_mirror
-     cp -rf /root/extra/distro_signatures.json /var/lib/cobbler/distro_signatures.json
-     service httpd restart
-     service cobblerd restart"
+    "cp -rf /root/cobbler/* /var/lib/cobbler/; \
+     rm -rf /var/lib/cobbler/conf; \
+     cp -rf /root/cobbler/conf/* /etc/cobbler"
 
 - name: chmod migrate_ks.py
   shell: |
     docker exec compass-cobbler bash -c \
     "chmod +x /var/lib/cobbler/triggers/sync/post/migrate_ks.py"
 
+- name: create cobbler dir
+  file:
+    path: "{{ docker_compose_dir }}/{{ item }}"
+    state: directory
+    mode: 0644
+  with_items:
+    - cobbler
+
+- name: render cobbler files
+  template:
+    src: "{{ item }}.j2"
+    dest: "{{ docker_compose_dir }}/cobbler/{{ item }}"
+    owner: root
+    group: root
+    mode: 0644
+  with_items:
+    - dhcp.template
+    - named.template
+    - settings
+    - zone.template
+
+- name: copy files to /etc/cobbler
+  shell: |
+    docker cp "{{ docker_compose_dir }}/cobbler/{{ item }}" compass-cobbler:/etc/cobbler
+  with_items:
+    - dhcp.template
+    - named.template
+    - settings
+    - zone.template
+
+#- name: restart cobblerd service
+#  shell: |
+#    docker exec compass-cobbler bash -c \
+#    "service cobblerd restart"
+
+- name: prepare iso and ppa
+  shell: |
+    docker cp "{{ compass_dists_dir }}/{{ item.value.iso_name }}.iso" compass-cobbler:/tmp
+    docker exec compass-cobbler bash -c \
+    "mkdir -p /mnt/{{ item.value.iso_name }}; \
+     mount -o loop /tmp/{{ item.value.iso_name }}.iso /mnt/{{ item.value.iso_name }}"
+    docker cp "{{ compass_dists_dir }}/{{ item.value.ppa_name }}.tar.gz" compass-cobbler:/tmp
+    docker exec compass-cobbler bash -c \
+    "mkdir -p /var/lib/cobbler/repo_mirror; \
+     tar -zxf /tmp/{{ item.value.ppa_name }}.tar.gz -C /var/lib/cobbler/repo_mirror"
+  with_dict: "{{ distros }}"
+  run_once: True
+  ignore_errors: True
+
 - name: cobbler import iso
   shell: |
     name=`basename {{ item.value.iso_name }} | sed -e 's/.iso//g' -e 's/-amd64//g' -e 's/-x86_64//g'`
     docker exec compass-cobbler bash -c \
-    "cobbler import --name $name \
+    "service cobblerd restart;
+     sleep 3;
+     cobbler import --name $name \
                     --path /mnt/{{ item.value.iso_name }} \
                     --arch x86_64 \
                     --kickstart /var/lib/cobbler/kickstarts/{{ item.value.kickstart }} \
                     --breed {{ item.value.breed }}"
   with_dict: "{{ distros }}"
   run_once: True
+  register: result
+  until: result.rc == 0
+  retries: 10
+  delay: 3
 
 - name: get default repo
   shell: |
@@ -60,8 +99,8 @@
   shell: |
     docker exec compass-cobbler bash -c \
     "cobbler repo add --name {{ item.value.ppa_name }} \
-                      --mirror=/var/lib/cobbler/repo_mirror/{{ item.value.ppa_name }} \
-                      --mirror-locally=True \
+                      --mirror /var/lib/cobbler/repo_mirror/{{ item.value.ppa_name }} \
+                      --mirror-locally True \
                       --arch=x86_64 {{ item.value.extra | default()}}"
   with_dict: "{{ distros }}"
   run_once: True

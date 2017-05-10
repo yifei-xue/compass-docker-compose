@@ -1,13 +1,12 @@
 ---
 # env vars
-compass_adapter_dir: /compassdir/work3/compass4nfv/deploy/adapters
-docker_compose_dir: /compassdir/work3/compass4nfv/work/docker_compose
+compass_dists_dir: /home/huang/work1/compass4nfv/work/deploy/installer/compass_dists
+docker_compose_dir: /home/huang/work1/compass4nfv/work/deploy/docker
 
 docker_tag: v0.1
 deck_port: 5050
 
 host_ip: 10.1.0.1
-install_net: eth1
 install_subnet: 10.1.0.0
 install_prefix: 24
 install_netmask: 255.255.255.0
@@ -54,6 +53,9 @@ pip_version_setuptools: latest
 pip_version_docker_py: latest
 pip_version_docker_compose: latest
 
+pip_pkg_name: pip-openstack.tar.gz
+feature_pkg_name: packages.tar.gz
+
 distros:
   ubuntu-16.04:
     breed: "ubuntu"
@@ -65,8 +67,6 @@ distros:
     version: "ubuntu"
     iso_name: ubuntu-16.04-server-amd64
     ppa_name: xenial-newton-ppa
-    iso_url: http://192.168.104.2:9999/download/ubuntu-16.04-server-amd64.iso
-    ppa_url: http://192.168.104.2:9999/download/xenial-newton-ppa.tar.gz
 
   CentOS-7:
     breed: "redhat"
@@ -75,6 +75,5 @@ distros:
     version: "centos"
     iso_name: CentOS-7-x86_64-Minimal-1611
     ppa_name: centos7-newton-ppa
-    iso_url: http://192.168.104.2:9999/download/CentOS-7-x86_64-Minimal-1611.iso
-    ppa_url: http://192.168.104.2:9999/download/centos7-newton-ppa.tar.gz
 
+pxe_boot_macs: ['00:00:57:9f:cb:95','00:00:80:8f:d4:e2','00:00:4b:ab:48:1f']

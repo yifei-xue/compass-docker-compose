@@ -1,6 +1,6 @@
 ---
 - name: Install Compass
-  hosts: all
+  hosts: localhost
   sudo: True
   roles:
 #    - docker

@@ -1,132 +1,10 @@
 ---
-- name: copy pipework script
-  copy:
-    src: pipework
-    dest: /usr/local/bin/pipework
-    owner: root
-    group: root
-    mode: 0755
-
-- name: create running directory
-  file:
-    path: "{{ docker_compose_dir }}"
-    state: directory
-    mode: 0644
-
-- name: create dists
-  file:
-    path: "{{ docker_compose_dir }}/{{ item }}"
-    state: directory
-    mode: 0644
-  with_items:
-    - dists
-    - dists/ppas
-    - dists/packages
-    - tmp
-    - extra
-    - ansible_callbacks
-
-- name: move cobbler files to docker-compose directory
-  command: "cp -rf {{ compass_adapter_dir }}/cobbler {{ docker_compose_dir }}/"
-
-- name: move ansible files to docker-compose directory
-  command: "cp -rf {{ compass_adapter_dir }}/ansible {{ docker_compose_dir }}/"
-
-- name: copy ansible callback files
-  copy:
-    src: "{{ item }}"
-    dest: "{{ docker_compose_dir }}/ansible_callbacks/"
-    owner: root
-    group: root
-    mode: 755
-  with_items:
-    - "{{ compass_adapter_dir }}/../status_callback.py"
-    - "{{ compass_adapter_dir }}/../playbook_done.py"
-
-- name: add openstack playbooks
-  shell: |
-    for i in `ls "{{ docker_compose_dir }}/ansible" | grep "openstack_"`; do
-        cp -rf "{{ docker_compose_dir }}"/ansible/openstack/* "{{ docker_compose_dir }}"/ansible/$i
-    done
-
-#- name: script to prepare ansible files
-#  template:
-#    src: prepare_ansible.sh
-#    dest: {{ docker_compose_dir }}/prepare_ansible.sh
-#    mode: 0755
-#
-#- name: run script to prepare ansible files
-#  command: "{{ docker_compose_dir }}/prepare_ansible.sh"
-#
-#- name: replace preseed_post_anamon
-#  copy:
-#    src: preseed_post_anamon
-#    dest: "{{ docker_compose_dir }}/cobbler/snippets/preseed_post_anamon"
-#    owner: root
-#    group: root
-#    mode: 0644
-
-- name: create sub directories
-  file:
-    path: "{{ docker_compose_dir }}/{{ item }}"
-    state: directory
-    mode: 0644
-  with_items:
-    - switch_list
-    - machine_list
-    - os_installer
-    - ansible/run
-
-- name: replace switch list
-  copy:
-    src: switch_list.conf
-    dest: "{{ docker_compose_dir }}/switch_list/switch_list.conf"
-    owner: root
-    group: root
-    mode: 0777
-
-#- name: render machine_list
-#  template:
-#    src: machine_list.conf.j2
-#    dest: "{{ docker_compose_dir }}/machine_list/machine_list.conf"
-#    owner: root
-#    group: root
-#    mode: 0777
-
-- name: render cobbler.conf
-  template:
-    src: cobbler.conf.j2
-    dest: "{{ docker_compose_dir }}/os_installer/cobbler.conf"
-    owner: root
-    group: root
-    mode: 0777
-
-- name: render templates
-  template:
-    src: "{{ item }}.j2"
-    dest: "{{ docker_compose_dir }}/cobbler/conf/{{ item }}"
-    owner: root
-    group: root
-    mode: 0644
-  with_items:
-    - dhcp.template
-    - named.template
-    - zone.template
-    - settings
-
-- name: render extra files
-  template:
-    src: "{{ item }}"
-    dest: "{{ docker_compose_dir }}/extra"
-  with_items:
-    - distro_signatures.json
-
 - name: get jumphost ip
   shell: |
     external_nic=`ip route |grep '^default'|awk '{print $5F}'`
     host_ip=`ifconfig $external_nic | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1}'`
     echo $host_ip
-  register: jh_ip
+  register: external_ip
 
 - name: render docker-compose file
   template:
@@ -136,77 +14,65 @@
     group: root
     mode: 0644
 
-- name: get isos
-  get_url:
-    url: "{{ item.value.iso_url }}"
-    dest: "{{ docker_compose_dir }}/dists/"
-  with_dict: "{{ distros }}"
-
-- name: get ppas
-  get_url:
-    url: "{{ item.value.ppa_url }}"
-    dest: "{{ docker_compose_dir }}/tmp/"
-  with_dict: "{{ distros }}"
-
-- name: download pip packages
-  get_url:
-    url: "{{ pip_url }}"
-    dest: "{{ docker_compose_dir }}/tmp/"
-    mode: 0644
-
-- name: download extra packages
-  get_url:
-    url: "{{ extra_packages_url }}"
-    dest: "{{ docker_compose_dir }}/tmp/"
-    mode: 0644
-
-- name: clean ppas
-  command: "rm -rf {{ docker_compose_dir }}/dists/ppas/*"
-
-- name: untar ppas
-  command: "tar -xzvf {{ docker_compose_dir }}/tmp/{{ item.value.ppa_name }}.tar.gz -C {{ docker_compose_dir }}/dists/ppas"
-  with_dict: "{{ distros }}"
-
-- name: remove pip directory
-  file:
-    path: "{{ docker_compose_dir }}/dists/pip-openstack"
-    state: absent
-
-- name: untar pip tarball
-  command: "tar -xzvf {{ docker_compose_dir }}/tmp/{{ pip_name }}.tar.gz -C {{ docker_compose_dir }}/dists/"
-
-- name: move pip packages
-  command: "mv {{ docker_compose_dir }}/dists/{{ pip_name }} {{ docker_compose_dir }}/dists/pip-openstack"
-  when: not pip_name == "pip-openstack"
-
-- name: remove packages directory
-  file:
-    path: "{{ docker_compose_dir }}/dists/packages"
-    state: absent
-
-- name: untar extra packages
-  command: "tar -xzvf {{ docker_compose_dir }}/tmp/packages.tar.gz -C {{ docker_compose_dir }}/dists/"
-
-- name: mount iso to dists
-  mount:
-    name: "{{ docker_compose_dir }}/mnt/{{ item.value.iso_name }}"
-    src: "{{ docker_compose_dir }}/dists/{{ item.value.iso_name }}.iso"
-    fstype: iso9660
-    opts: ro,loop
-    state: mounted
-  with_dict: "{{ distros }}"
-
 - name: docker-compose down
   shell: docker-compose down
   args:
     chdir: "{{ docker_compose_dir }}"
+
+- name: load docker images
+  shell: |
+    docker load -i "{{ compass_dists_dir }}/{{ item }}"
+  with_items:
+    - compass-deck.tar
+    - compass-tasks.tar
+    - compass-cobbler.tar
+    - compass-db.tar
+    - compass-mq.tar
+
+- name: create dir
+  file:
+    path: "{{ docker_compose_dir }}/{{ item }}"
+    state: directory
+    mode: 0644
+  with_items:
+    - ansible
+    - os_installer
+
+- name: render cobbler
+  template:
+    src: "{{ item }}.j2"
+    dest: "{{ docker_compose_dir }}/os_installer/{{ item }}"
+    owner: root
+    group: root
+    mode: 0644
+  with_items:
+    - cobbler.conf
 
 - name: docker-compose up
   shell: docker-compose up -d
   args:
     chdir: "{{ docker_compose_dir }}"
 
-- name: cp ansible_modules
+- name: create compass db tables
+  shell: |
+    docker exec compass-deck bash -c "/opt/compass/bin/manage_db.py createdb"
+  tags:
+    - redploy
+
+- name: replace cobbler.conf
+  shell: |
+    docker cp "{{ docker_compose_dir }}/os_installer/cobbler.conf" \
+    compass-tasks:/etc/compass/os_installer/; \
+    docker cp "{{ docker_compose_dir }}/os_installer/cobbler.conf" \
+    compass-deck:/etc/compass/os_installer/
+
+- name: cp ansible dir
   shell: |
     docker exec compass-tasks bash -c \
-    "cp -rf /var/ansible/ansible_modules /opt/ansible-modules"
+    "cp -rf /root/ansible /var; \
+     mkdir -p /var/ansible/run"
+
+#- name: cp ansible_modules
+#  shell: |
+#    docker exec compass-tasks bash -c \
+#    "cp -rf /var/ansible/ansible_modules /opt/ansible-modules"
