@@ -38,7 +38,7 @@
 - name: copy cinder file
   copy:
    src: cinder.yml
-   dest: {{ docker_compose_dir }}/cinder.yml
+   dest: "{{ docker_compose_dir }}/cinder.yml"
 
 - name: copy file to docker
   shell: |
