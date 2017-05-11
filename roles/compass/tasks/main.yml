@@ -55,6 +55,7 @@
 
 - name: create compass db tables
   shell: |
+    sleep 3; \
     docker exec compass-deck bash -c "/opt/compass/bin/manage_db.py createdb"
   tags:
     - redploy
