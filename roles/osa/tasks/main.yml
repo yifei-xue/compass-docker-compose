@@ -10,9 +10,9 @@
   shell: |
     docker exec compass-tasks bash -c \
     "rm -rf /opt/openstack-ansible
-     git clone -b 15.1.2 https://git.openstack.org/openstack/openstack-ansible /opt/openstack-ansible"
+     git clone https://git.openstack.org/openstack/openstack-ansible /opt/openstack-ansible"
 
-- name: git clone openstack-ansible
+- name: change openstack-ansible to ocata branch
   shell: |
     docker exec compass-tasks bash -c \
     "cd /opt/openstack-ansible
@@ -21,7 +21,8 @@
 - name: copy /opt/openstack-ansible/etc/openstack_deploy to /etc/openstack_deploy
   shell: |
     docker exec compass-tasks bash -c \
-    "/bin/cp -rf /opt/openstack-ansible/etc/openstack_deploy /etc/openstack_deploy"
+    "rm -rf /etc/openstack_deploy \
+     /bin/cp -rf /opt/openstack-ansible/etc/openstack_deploy /etc/openstack_deploy"
 
 - name: bootstrap
   shell: |
