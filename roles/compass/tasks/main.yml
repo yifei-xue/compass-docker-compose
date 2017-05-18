@@ -73,6 +73,13 @@
     "cp -rf /root/ansible /var; \
      mkdir -p /var/ansible/run"
 
+- name: restart compass-deck and compass-tasks
+  shell: |
+    docker-compose restart compass-deck
+    docker-compose restart compass-tasks
+  args:
+    chdir: "{{ docker_compose_dir }}"
+
 #- name: cp ansible_modules
 #  shell: |
 #    docker exec compass-tasks bash -c \
