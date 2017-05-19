@@ -66,7 +66,7 @@ distros:
     aliase: "xenial"
     version: "ubuntu"
     iso_name: ubuntu-16.04-server-amd64
-    ppa_name: xenial-newton-ppa
+    ppa_name: xenial-ocata-ppa
 
   CentOS-7:
     breed: "redhat"
@@ -74,6 +74,5 @@ distros:
     aliase: "centos7"
     version: "centos"
     iso_name: CentOS-7-x86_64-Minimal-1611
-    ppa_name: centos7-newton-ppa
+    ppa_name: centos7-ocata-ppa
 
-pxe_boot_macs: ['00:00:57:9f:cb:95','00:00:80:8f:d4:e2','00:00:4b:ab:48:1f']
