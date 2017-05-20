@@ -1,7 +1,14 @@
 ---
 # env vars
-compass_dists_dir: /home/huang/work1/compass4nfv/work/deploy/installer/compass_dists
-docker_compose_dir: /home/huang/work1/compass4nfv/work/deploy/docker
+compass_dir: /compassdir/work1/compass4nfv
+compass_dists_dir: "{{ compass_dir }}/work/deploy/installer/compass_dists"
+docker_compose_dir: "{{ compass_dir }}/work/deploy/docker"
+
+compass_deck: huangxiangyu/compass-deck
+compass_tasks: huangxiangyu/compass-tasks
+compass_cobbler: huangxiangyu/compass-cobbler
+compass_db: huangxiangyu/compass-db
+compass_mq: huangxiangyu/compass-mq
 
 docker_tag: v0.1
 deck_port: 5050
@@ -11,47 +18,6 @@ install_subnet: 10.1.0.0
 install_prefix: 24
 install_netmask: 255.255.255.0
 install_ip_range: 10.1.0.100 10.1.0.250
-
-
-# Compass default vars
-# adapter_repo: https://github.com/stack360/compass4nfv
-#
-# ubuntu_iso_url: http://192.168.104.2:9999/download/ubuntu-16.04-server-amd64.iso
-# centos_iso_url: http://192.168.104.2:9999/download/CentOS-7-x86_64-Minimal-1611.iso
-# ubuntu_ppa_url: http://192.168.104.2:9999/download/xenial-newton-ppa.tar.gz
-# centos_ppa_url: http://192.168.104.2:9999/download/centos7-newton-ppa.tar.gz
-# ppas_tarlist:
-#     - trusty-mitaka-ppa.tar.gz_nfs-server
-#     - centos7-mitaka-ppa.tar.gz
-# centos_ppa_url: http://192.168.253.161:8000/centos7-mitaka-ppa.tar.gz
-pip_url: http://192.168.104.2:9999/download/pip-openstack.tar.gz
-pip_name: pip-openstack
-extra_packages_url: http://192.168.104.2:9999/download/packages.tar.gz
-
-#ubuntu_iso_name: ubuntu-16.04-server-amd64.iso
-#centos_iso_name: CentOS-7-x86_64-Minimal-1611.iso
-
-# Docker vars
-apt_key_sig: 58118E89F3A912897C070ADBF76221572C52609D
-apt_key_url: hkp://p80.pool.sks-keyservers.net:80
-apt_repository: deb https://apt.dockerproject.org/repo {{ ansible_lsb.id|lower }}-{{ ansible_lsb.codename|lower }} main
-
-docker_pkg_name: docker-engine
-docker_apt_cache_valid_time: 600
-
-docker_defaults_file_path: /etc/default/docker
-docker_opts: "-s devicemapper"
-
-# Flags for whether to install pip packages
-pip_install_pip: true
-pip_install_setuptools: true
-pip_install_docker_py: true
-pip_install_docker_compose: true
-# Versions for the python packages that are installed
-pip_version_pip: latest
-pip_version_setuptools: latest
-pip_version_docker_py: latest
-pip_version_docker_compose: latest
 
 pip_pkg_name: pip-openstack.tar.gz
 feature_pkg_name: packages.tar.gz
@@ -75,4 +41,4 @@ distros:
     version: "centos"
     iso_name: CentOS-7-x86_64-Minimal-1611
     ppa_name: centos7-ocata-ppa
-
+pxe_boot_macs: ['00:00:3f:fa:3f:90','00:00:55:f5:52:c4','00:00:29:29:24:0d','00:00:15:cc:fb:8a','00:00:32:0b:2b:43']

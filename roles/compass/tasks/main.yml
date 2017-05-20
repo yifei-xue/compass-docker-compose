@@ -29,19 +29,24 @@
     - compass-db.tar
     - compass-mq.tar
 
-- name: create dir
+- name: copy files
+  shell:
+    cp -rf "{{ item }}" "{{ docker_compose_dir }}"
+  with_items:
+    - "{{ compass_dir }}/deploy/adapters/ansible"
+    - "{{ compass_dir }}/deploy/compass_conf"
+    - "{{ compass_dir }}/deploy/adapters/cobbler"
+
+- name: create run dir
   file:
-    path: "{{ docker_compose_dir }}/{{ item }}"
+    path: "{{ docker_compose_dir }}/ansible/run"
     state: directory
     mode: 0644
-  with_items:
-    - ansible
-    - os_installer
 
 - name: render cobbler
   template:
     src: "{{ item }}.j2"
-    dest: "{{ docker_compose_dir }}/os_installer/{{ item }}"
+    dest: "{{ docker_compose_dir }}/compass_conf/os_installer/{{ item }}"
     owner: root
     group: root
     mode: 0644
@@ -60,18 +65,15 @@
   tags:
     - redploy
 
-- name: replace cobbler.conf
+- name: add ansible callback
   shell: |
-    docker cp "{{ docker_compose_dir }}/os_installer/cobbler.conf" \
-    compass-tasks:/etc/compass/os_installer/; \
-    docker cp "{{ docker_compose_dir }}/os_installer/cobbler.conf" \
-    compass-deck:/etc/compass/os_installer/
-
-- name: cp ansible dir
-  shell: |
-    docker exec compass-tasks bash -c \
-    "cp -rf /root/ansible /var; \
-     mkdir -p /var/ansible/run"
+    docker cp "{{ item }}" \
+    compass-deck:/root/compass-deck/bin/ansible_callbacks
+    docker cp "{{ item }}" \
+    compass-tasks:/opt/ansible_callbacks
+  with_items:
+    - "{{ compass_dir }}/deploy/status_callback.py"
+    - "{{ compass_dir }}/deploy/playbook_done.py"
 
 - name: restart compass-deck and compass-tasks
   shell: |
@@ -79,8 +81,3 @@
     docker-compose restart compass-tasks
   args:
     chdir: "{{ docker_compose_dir }}"
-
-#- name: cp ansible_modules
-#  shell: |
-#    docker exec compass-tasks bash -c \
-#    "cp -rf /var/ansible/ansible_modules /opt/ansible-modules"

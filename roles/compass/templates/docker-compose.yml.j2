@@ -8,7 +8,7 @@ services:
     expose:
     - 3306
     tty: true
-    image: opnfv/compass-db
+    image: {{ compass_db }}:{{ docker_tag }}
     stdin_open: true
     command:
     - /sbin/entrypoint.sh
@@ -20,14 +20,14 @@ services:
     expose:
     - 5672
     tty: true
-    image: rabbitmq
+    image: {{ compass_mq }}:{{ docker_tag }}
     stdin_open: true
 
   compass-tasks:
     container_name: compass-tasks
     hostname: compass-tasks
     privileged: true
-    image: opnfv/compass-tasks
+    image: {{ compass_tasks }}:{{ docker_tag }}
     links:
     - compass-mq
     - compass-cobbler
@@ -36,6 +36,7 @@ services:
     - compass-cobbler
     stdin_open: true
     volumes:
+    - {{ docker_compose_dir }}/compass_conf:/etc/compass
     - {{ docker_compose_dir }}/ansible:/var/ansible
     command:
     - /usr/local/bin/start.sh
@@ -44,7 +45,7 @@ services:
     container_name: compass-deck
     hostname: compass-deck
     privileged: true
-    image: opnfv/compass-deck
+    image: {{ compass_deck }}:{{ docker_tag }}
     ports:
     - {{ host_ip }}:{{ deck_port }}:80/tcp
     - {{ external_ip.stdout }}:{{ deck_port }}:80/tcp
@@ -56,6 +57,8 @@ services:
     - compass-db
     - compass-mq
     stdin_open: true
+    volumes:
+    - {{ docker_compose_dir }}/compass_conf:/etc/compass
     command:
     - /usr/local/bin/start.sh
 
@@ -64,12 +67,14 @@ services:
     hostname: compass-cobbler
     network_mode: host
     privileged: true
-    image: opnfv/compass-cobbler
+    image: {{ compass_cobbler }}:{{ docker_tag }}
     ports:
     - {{ host_ip }}:80:80/tcp
     - {{ host_ip }}:69:69
     - {{ host_ip }}:443:443/tcp
     - {{ host_ip }}:25151:25151/tcp
     - {{ host_ip }}:67:67/tcp
+    volumes:
+    - {{ docker_compose_dir }}/cobbler:/root/cobbler
     command:
     - /sbin/init

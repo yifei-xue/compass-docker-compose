@@ -28,7 +28,8 @@
   shell: |
     docker exec compass-tasks bash -c \
     "cd /opt/openstack-ansible; \
-     scripts/bootstrap-ansible.sh"
+     scripts/bootstrap-ansible.sh; \
+     rm /usr/local/bin/ansible-playbook -f"
 
 - name: generate password token
   shell: |
