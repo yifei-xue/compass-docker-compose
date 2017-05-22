@@ -21,13 +21,13 @@
 
 - name: load docker images
   shell: |
-    docker load -i "{{ compass_dists_dir }}/{{ item }}"
+    docker load -i "{{ compass_dists_dir }}/{{ item.split('/')[1].split(':')[0] }}.tar"
   with_items:
-    - compass-deck.tar
-    - compass-tasks.tar
-    - compass-cobbler.tar
-    - compass-db.tar
-    - compass-mq.tar
+    - "{{ compass_deck }}"
+    - "{{ compass_tasks }}"
+    - "{{ compass_cobbler }}"
+    - "{{ compass_db }}"
+    - "{{ compass_mq }}"
 
 - name: copy files
   shell:

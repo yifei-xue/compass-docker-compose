@@ -4,11 +4,11 @@ compass_dir: /compassdir/work1/compass4nfv
 compass_dists_dir: "{{ compass_dir }}/work/deploy/installer/compass_dists"
 docker_compose_dir: "{{ compass_dir }}/work/deploy/docker"
 
-compass_deck: huangxiangyu/compass-deck
-compass_tasks: huangxiangyu/compass-tasks
-compass_cobbler: huangxiangyu/compass-cobbler
-compass_db: huangxiangyu/compass-db
-compass_mq: huangxiangyu/compass-mq
+compass_deck: huangxiangyu/compass-deck:v0.1
+compass_tasks: huangxiangyu/compass-tasks:v0.1
+compass_cobbler: huangxiangyu/compass-cobbler:v0.1
+compass_db: huangxiangyu/compass-db:v0.1
+compass_mq: huangxiangyu/compass-mq:v0.1
 
 docker_tag: v0.1
 deck_port: 5050
@@ -41,4 +41,5 @@ distros:
     version: "centos"
     iso_name: CentOS-7-x86_64-Minimal-1611
     ppa_name: centos7-ocata-ppa
-pxe_boot_macs: ['00:00:3f:fa:3f:90','00:00:55:f5:52:c4','00:00:29:29:24:0d','00:00:15:cc:fb:8a','00:00:32:0b:2b:43']
+
+

@@ -8,7 +8,7 @@ services:
     expose:
     - 3306
     tty: true
-    image: {{ compass_db }}:{{ docker_tag }}
+    image: {{ compass_db }}
     stdin_open: true
     command:
     - /sbin/entrypoint.sh
@@ -20,14 +20,14 @@ services:
     expose:
     - 5672
     tty: true
-    image: {{ compass_mq }}:{{ docker_tag }}
+    image: {{ compass_mq }}
     stdin_open: true
 
   compass-tasks:
     container_name: compass-tasks
     hostname: compass-tasks
     privileged: true
-    image: {{ compass_tasks }}:{{ docker_tag }}
+    image: {{ compass_tasks }}
     links:
     - compass-mq
     - compass-cobbler
@@ -45,7 +45,7 @@ services:
     container_name: compass-deck
     hostname: compass-deck
     privileged: true
-    image: {{ compass_deck }}:{{ docker_tag }}
+    image: {{ compass_deck }}
     ports:
     - {{ host_ip }}:{{ deck_port }}:80/tcp
     - {{ external_ip.stdout }}:{{ deck_port }}:80/tcp
@@ -67,7 +67,7 @@ services:
     hostname: compass-cobbler
     network_mode: host
     privileged: true
-    image: {{ compass_cobbler }}:{{ docker_tag }}
+    image: {{ compass_cobbler }}
     ports:
     - {{ host_ip }}:80:80/tcp
     - {{ host_ip }}:69:69
