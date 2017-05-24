@@ -8,8 +8,10 @@
 
 - name: fix name.service
   shell: |
+    if [ ! -f "/etc/apparmor.d/usr.sbin.named" ]; then
     ln -s /etc/apparmor.d/usr.sbin.named /etc/apparmor.d/disable/
     apparmor_parser -R /etc/apparmor.d/usr.sbin.named
+    fi
 
 - name: render docker-compose file
   template:
