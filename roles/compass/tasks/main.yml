@@ -82,9 +82,9 @@
     - "{{ compass_dir }}/deploy/status_callback.py"
     - "{{ compass_dir }}/deploy/playbook_done.py"
 
-- name: restart compass-deck and compass-tasks
-  shell: |
-    docker-compose restart compass-deck
-    docker-compose restart compass-tasks
-  args:
-    chdir: "{{ docker_compose_dir }}"
+# - name: restart compass-deck and compass-tasks
+#   shell: |
+#     docker-compose restart compass-deck
+#     docker-compose restart compass-tasks
+#   args:
+#     chdir: "{{ docker_compose_dir }}"

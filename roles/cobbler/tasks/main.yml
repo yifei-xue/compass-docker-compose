@@ -1,9 +1,4 @@
 ---
-#- name: pipework an IP address for compass-cobbler
-#  command: "pipework {{ install_net }} compass-cobbler {{ install_ip }}/{{ install_prefix }}"
-
-#- name: run cobbler start.sh
-#  command: docker exec -it compass-cobbler /usr/local/bin/start.sh
 - name: copy files
   shell: |
     docker exec compass-cobbler bash -c \
@@ -59,8 +54,7 @@
      mount -o loop /tmp/{{ item.value.iso_name }}.iso /mnt/{{ item.value.iso_name }}"
     docker cp "{{ compass_dists_dir }}/{{ item.value.ppa_name }}.tar.gz" compass-cobbler:/tmp
     docker exec compass-cobbler bash -c \
-    "mkdir -p /var/lib/cobbler/repo_mirror; \
-     tar -zxf /tmp/{{ item.value.ppa_name }}.tar.gz -C /var/lib/cobbler/repo_mirror"
+    "mkdir -p /var/lib/cobbler/repo_mirror/{{ item.value.ppa_name }}"
   with_dict: "{{ distros }}"
   run_once: True
   ignore_errors: True
@@ -82,18 +76,6 @@
   until: result.rc == 0
   retries: 10
   delay: 3
-
-- name: get default repo
-  shell: |
-    docker exec compass-cobbler bash -c \
-    "cobbler repo list"
-  register: default_repos
-
-- name: remove default repo
-  shell: |
-    docker exec compass-cobbler bash -c \
-    "cobbler repo remove --name {{ item }}"
-  with_items: "{{ default_repos.stdout_lines }}"
 
 - name: add repos
   shell: |
@@ -117,11 +99,6 @@
                           --kopts-post \"{{ item.value.kopts_post | default('') }}\""
   with_dict: "{{ distros }}"
   run_once: True
-
-- name: cobbler reposync
-  shell: |
-    docker exec compass-cobbler bash -c \
-    "cobbler reposync"
 
 - name: cobbler sync
   shell: |

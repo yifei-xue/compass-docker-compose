@@ -60,6 +60,7 @@ services:
     volumes:
     - {{ docker_compose_dir }}/compass_conf:/etc/compass
     command:
+    - /sbin/init
     - /usr/local/bin/start.sh
 
   compass-cobbler:

@@ -4,8 +4,8 @@ compass_dir: /compassdir/work1/compass4nfv
 compass_dists_dir: "{{ compass_dir }}/work/deploy/installer/compass_dists"
 docker_compose_dir: "{{ compass_dir }}/work/deploy/docker"
 
-compass_deck: huangxiangyu/compass-deck:v0.1
-compass_tasks: wtwde/compass-tasks-osa:v0.1
+compass_deck: huangxiangyu/compass-deck:v0.2
+compass_tasks: wtwde/compass-tasks-osa:v0.2
 compass_cobbler: huangxiangyu/compass-cobbler:v0.1
 compass_db: huangxiangyu/compass-db:v0.1
 compass_mq: huangxiangyu/compass-mq:v0.1
