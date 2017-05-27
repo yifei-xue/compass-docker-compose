@@ -44,6 +44,13 @@
     - "{{ compass_dir }}/deploy/compass_conf"
     - "{{ compass_dir }}/deploy/adapters/cobbler"
 
+- name: copy ansible scripts into ansible folder
+  shell: |
+    for i in `ls "{{ docker_compose_dir }}/ansible" | grep "openstack_"`; do
+        cp -rf "{{ docker_compose_dir }}"/ansible/openstack/* \
+             "{{ docker_compose_dir }}"/ansible/$i
+    done
+
 - name: create run dir
   file:
     path: "{{ docker_compose_dir }}/ansible/run"
@@ -86,3 +93,6 @@
   shell: |
     docker exec compass-tasks bash -c "rm -rf /var/ansible/run/*"
 
+- name: start httpd service
+  shell: |
+    docker exec compass-deck bash -c "systemctl start httpd"
