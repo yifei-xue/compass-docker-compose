@@ -1,7 +1,7 @@
 ---
 - name: get jumphost ip
   shell: |
-    external_nic=`ip route |grep '^default'|awk '{print $5F}'`
+    external_nic=`ip route |grep '^default'|awk '{print $5F}'|sed -n '1p'`
     host_ip=`ifconfig $external_nic | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1}'`
     echo $host_ip
   register: external_ip
