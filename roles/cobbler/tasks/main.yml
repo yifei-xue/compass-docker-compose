@@ -11,21 +11,10 @@
     docker exec compass-cobbler bash -c \
     "chmod +x /var/lib/cobbler/triggers/sync/post/migrate_ks.py"
 
-- name: create cobbler dir
-  file:
-    path: "{{ docker_compose_dir }}/{{ item }}"
-    state: directory
-    mode: 0644
-  with_items:
-    - cobbler
-
 - name: render cobbler files
   template:
     src: "{{ item }}.j2"
     dest: "{{ docker_compose_dir }}/cobbler/{{ item }}"
-    owner: root
-    group: root
-    mode: 0644
   with_items:
     - dhcp.template
     - named.template

@@ -9,17 +9,14 @@
 - name: fix name.service
   shell: |
     if [ ! -f "/etc/apparmor.d/disable/usr.sbin.named" ]; then
-    ln -s /etc/apparmor.d/usr.sbin.named /etc/apparmor.d/disable/
-    apparmor_parser -R /etc/apparmor.d/usr.sbin.named
+        ln -s /etc/apparmor.d/usr.sbin.named /etc/apparmor.d/disable/
+        apparmor_parser -R /etc/apparmor.d/usr.sbin.named
     fi
 
 - name: render docker-compose file
   template:
     src: docker-compose.yml.j2
     dest: "{{ docker_compose_dir }}/docker-compose.yml"
-    owner: root
-    group: root
-    mode: 0644
 
 - name: docker-compose down
   shell: docker-compose down
@@ -44,6 +41,15 @@
     - "{{ compass_dir }}/deploy/compass_conf"
     - "{{ compass_dir }}/deploy/adapters/cobbler"
 
+- name: chmod directory
+  file:
+    dest: "{{ item }}"
+    mode: 0755
+  with_items:
+    - "{{ compass_dir }}/deploy/adapters/ansible"
+    - "{{ compass_dir }}/deploy/compass_conf"
+    - "{{ compass_dir }}/deploy/adapters/cobbler"
+
 - name: copy ansible scripts into ansible folder
   shell: |
     for i in `ls "{{ docker_compose_dir }}/ansible" | grep "openstack_"`; do
@@ -55,15 +61,11 @@
   file:
     path: "{{ docker_compose_dir }}/ansible/run"
     state: directory
-    mode: 0644
 
 - name: render cobbler
   template:
     src: "{{ item }}.j2"
     dest: "{{ docker_compose_dir }}/compass_conf/os_installer/{{ item }}"
-    owner: root
-    group: root
-    mode: 0644
   with_items:
     - cobbler.conf
 
