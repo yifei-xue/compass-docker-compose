@@ -43,7 +43,7 @@
 
 - name: copy plugins
   shell:
-    cp -rf "{{ compass_dir }}/plugins/*" "{{ docker_compose_dir }}/ansible/roles/"
+    cp -rf "{{ compass_dir }}"/plugins/* "{{ docker_compose_dir }}"/ansible/roles/
 
 - name: chmod directory
   file:
