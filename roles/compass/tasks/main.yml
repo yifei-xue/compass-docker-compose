@@ -41,12 +41,6 @@
     - "{{ compass_dir }}/deploy/compass_conf"
     - "{{ compass_dir }}/deploy/adapters/cobbler"
 
-- name: copy the roles of plugins
-  shell:
-    cp -rf "{{ item }}" "{{ docker_compose_dir }}/ansible/roles/"
-  with_items:
-    - "{{ compass_dir }}/plugins/roles/*"
-
 - name: chmod directory
   file:
     dest: "{{ item }}"
