@@ -79,3 +79,15 @@ services:
     - {{ docker_compose_dir }}/cobbler:/root/cobbler
     command:
     - /sbin/init
+
+{% if compass_repo is defined %}
+  compass-repo:
+    container_name: compass-repo
+    hostname: compass-repo
+    privileged: true
+    image: {{ compass_repo }}
+    expose:
+    - 80
+    tty: true
+    stdin_open: true
+{% endif %}
