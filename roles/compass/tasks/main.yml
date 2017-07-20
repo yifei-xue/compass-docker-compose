@@ -45,6 +45,9 @@
   command: "ls {{ compass_dir }}/plugins/"
   register: plugin_list
 
+- debug: var={{ item }}
+  with_items: plugin_list.stdout_lines
+
 - name: copy plugins
   copy:
     src: "{{ compass_dir }}/plugins/{{ item }}/roles/"
