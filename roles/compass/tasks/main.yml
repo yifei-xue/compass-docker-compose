@@ -41,9 +41,19 @@
     - "{{ compass_dir }}/deploy/compass_conf"
     - "{{ compass_dir }}/deploy/adapters/cobbler"
 
+- name: retrieve plugins list
+  command: "ls {{ compass_dir }}/plugins/"
+  register: plugin_list
+
+- debug: var={{item}}
+  with_item: plugin_list.stdout_lines
+
 - name: copy plugins
-  shell:
-    cp -rf "{{ compass_dir }}"/plugins/* "{{ docker_compose_dir }}"/ansible/roles/
+  copy:
+    src: "{{ compass_dir }}/plugins/{{ item }}/roles/"
+    dest: "{{ docker_compose_dir }}/ansible/roles/"
+  with_items: plugin_list.stdout_lines
+  when: item != 'template'
 
 - name: chmod directory
   file:
