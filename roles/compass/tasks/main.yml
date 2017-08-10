@@ -33,6 +33,10 @@
     - "{{ compass_db }}"
     - "{{ compass_mq }}"
 
+- name: load yardstick image
+  shell: |
+    docker load -i "{{ compass_dists_dir }}/yardstick.tar"
+
 - name: copy files
   shell:
     cp -rf "{{ item }}" "{{ docker_compose_dir }}"
