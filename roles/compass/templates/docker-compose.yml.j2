@@ -86,8 +86,8 @@ services:
     hostname: compass-repo
     privileged: true
     image: {{ compass_repo }}
-    expose:
-    - 80
+    ports:
+    - {{ host_ip }}:{{ repo_port }}:80/tcp
     tty: true
     stdin_open: true
 {% endif %}

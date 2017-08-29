@@ -33,9 +33,15 @@
     - "{{ compass_db }}"
     - "{{ compass_mq }}"
 
+- name: load offline repo
+  shell: |
+    docker load -i "{{ compass_dists_dir }}/{{ compass_repo.split('/')[1].split(':')[0] }}.tar"
+  when: compass_repo is defined
+
 - name: load yardstick image
   shell: |
-    docker load -i "{{ compass_dists_dir }}/yardstick.tar"
+    docker load -i "{{ compass_dists_dir }}/{{ yardstick.split('/')[1].split(':')[0] }}.tar"
+  when: yardstick is defined
 
 - name: copy files
   shell:

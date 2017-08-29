@@ -11,8 +11,11 @@ compass_db: compass4nfv/compass-db
 compass_mq: compass4nfv/compass-mq
 #compass_repo: compass4nfv/compass-repo-osa-ubuntu
 
+yardstick: opnfv/yardstick
+
 docker_tag: v0.1
 deck_port: 5050
+repo_port: 5151
 
 host_ip: 10.1.0.1
 install_subnet: 10.1.0.0
