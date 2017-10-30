@@ -27,7 +27,7 @@ pip_pkg_name: pip-openstack.tar.gz
 feature_pkg_name: packages.tar.gz
 
 distros:
-  ubuntu-16.04:
+  ubuntu-16.04.3:
     breed: "ubuntu"
     kickstart: "default16.seed"
     kopts: "netcfg/choose_interface=auto console='ttyS0,115200n8' console=tty0 net.ifnames=0 biosdevname=0 vga=788"
@@ -35,7 +35,7 @@ distros:
     extra: "--apt-dists=xenial --apt-components=main"
     aliase: "xenial"
     version: "ubuntu"
-    iso_name: ubuntu-16.04-server-amd64
+    iso_name: ubuntu-16.04.3-server-amd64
     ppa_name: xenial-ocata-ppa
 
   CentOS-7:
