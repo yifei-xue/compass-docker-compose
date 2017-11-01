@@ -36,7 +36,7 @@ distros:
     aliase: "xenial"
     version: "ubuntu"
     iso_name: ubuntu-16.04.3-server-amd64
-    ppa_name: xenial-ocata-ppa
+    ppa_name: xenial-pike-ppa
 
   CentOS-7:
     breed: "redhat"
