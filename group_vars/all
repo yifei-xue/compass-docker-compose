@@ -43,6 +43,6 @@ distros:
     kickstart: "default.ks"
     aliase: "centos7"
     version: "centos"
-    iso_name: CentOS-7-x86_64-Minimal-1611
-    ppa_name: centos7-ocata-ppa
+    iso_name: CentOS-7-x86_64-Minimal-1708
+    ppa_name: centos7-pike-ppa
 
